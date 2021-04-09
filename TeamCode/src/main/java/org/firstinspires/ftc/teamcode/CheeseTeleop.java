@@ -10,14 +10,14 @@ import org.firstinspires.ftc.teamcode.lib.Tuner;
 public class CheeseTeleop extends OpMode {
 
 
-    private Hardware hardware;
+    private _Hardware hardware;
     private Tuner tuner;
 
     private String[] titles = new String[] {"lowScalar", "turnCoeff", "lowTurnCoeff","quickturn cutoff", "singlestick", "invert back"};
     private double[] values = new double[] {    0.5    ,     0.58   ,        0.2    ,        10        ,       1      ,       1      };
 
     public void init(){
-        hardware = new Hardware(hardwareMap, telemetry, false, false);
+        hardware = new _Hardware(hardwareMap, telemetry, false, false);
         tuner = new Tuner(titles, values, gamepad1, telemetry);
     }
 

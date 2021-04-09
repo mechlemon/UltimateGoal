@@ -10,14 +10,14 @@ import org.firstinspires.ftc.teamcode.lib.Tuner;
 
 public class AngularRomegaTeleop extends OpMode {
 
-    private Hardware hardware;
+    private _Hardware hardware;
     private Tuner tuner;
 
     private String[] titles = new String[] {"linCoeff", "angCoeff", "halfDistBetWheels", "singlestick", "velo PID", "invert back"};
     private double[] values = new double[] {     0.7  ,      1  ,          0.2         ,       1      ,      1    ,       -1      };
 
     public void init(){
-        hardware = new Hardware(hardwareMap, telemetry, false, false);
+        hardware = new _Hardware(hardwareMap, telemetry, false, false);
         tuner = new Tuner(titles, values, gamepad1, telemetry);
     }
 

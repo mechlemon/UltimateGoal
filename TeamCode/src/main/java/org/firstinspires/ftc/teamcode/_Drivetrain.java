@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
-public class Drivetrain {
+public class _Drivetrain {
 
     private final double WHEEL_CIRCUMFERENCE = 1.88976 * Math.PI; //48mm diameter omni to inches
     private final double ODO_GEAR_RATIO = 40/60.0;
@@ -15,7 +15,7 @@ public class Drivetrain {
     public DcMotor leftMotor, rightMotor;
     private double leftZero, rightZero = 0;
 
-    public Drivetrain(DcMotor leftMotor, DcMotor rightMotor) {
+    public _Drivetrain(DcMotor leftMotor, DcMotor rightMotor) {
         this.leftMotor = leftMotor;
         this.rightMotor = rightMotor;
 

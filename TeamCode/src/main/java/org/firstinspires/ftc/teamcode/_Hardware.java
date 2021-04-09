@@ -1,3 +1,4 @@
+
 package org.firstinspires.ftc.teamcode;
 
 
@@ -12,18 +13,18 @@ import org.firstinspires.ftc.teamcode.lib.VuforiaPhone;
 
 
 //makes a robot, including motors, servos, imu
-public class Hardware {
+public class _Hardware {
 
 
-    public Drivetrain drivetrain;
+    public _Drivetrain drivetrain;
     public IMU imu;
     public VuforiaPhone vuforiaPhone;
     public DcMotorEx shooter;
 
 
 
-    public Hardware(HardwareMap hardwareMap, Telemetry telemetry, boolean initIMU, boolean initVuforia){
-        drivetrain = new Drivetrain(hardwareMap.get(DcMotor.class, "1-0"),
+    public _Hardware(HardwareMap hardwareMap, Telemetry telemetry, boolean initIMU, boolean initVuforia){
+        drivetrain = new _Drivetrain(hardwareMap.get(DcMotor.class, "1-0"),
                                     hardwareMap.get(DcMotor.class, "1-1"));
 
         shooter = hardwareMap.get(DcMotorEx.class, "1-2");
