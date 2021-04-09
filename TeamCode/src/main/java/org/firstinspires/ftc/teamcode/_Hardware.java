@@ -18,27 +18,25 @@ public class _Hardware {
 
     public _Drivetrain drivetrain;
     public IMU imu;
-    public VuforiaPhone vuforiaPhone;
-    public DcMotorEx shooter;
+//    public DcMotor shooter;
 
 
 
-    public _Hardware(HardwareMap hardwareMap, Telemetry telemetry, boolean initIMU, boolean initVuforia){
-        drivetrain = new _Drivetrain(hardwareMap.get(DcMotor.class, "1-0"),
-                                    hardwareMap.get(DcMotor.class, "1-1"));
+    public _Hardware(HardwareMap hardwareMap, Telemetry telemetry){
 
-        shooter = hardwareMap.get(DcMotorEx.class, "1-2");
-
-        if(initIMU){
-            imu = new IMU(hardwareMap.get(BNO055IMU.class,"imu"));
-            imu.setHeadingAxis(IMU.HeadingAxis.YAW);
-            imu.initialize();
-        }
+        imu = new IMU(hardwareMap.get(BNO055IMU.class,"imu"));
+        imu.setHeadingAxis(IMU.HeadingAxis.YAW);
+        imu.initialize();
 
 
-        if(initVuforia){
-            vuforiaPhone = new VuforiaPhone(hardwareMap, telemetry);
-        }
+        drivetrain = new _Drivetrain(
+            hardwareMap.get(DcMotorEx.class, "1-0"),    //left
+            hardwareMap.get(DcMotorEx.class, "1-1"),    //right
+            hardwareMap.get(DcMotorEx.class, "1-2"),     //odo
+            imu
+        );
+
+//        shooter = hardwareMap.get(DcMotorEx.class, "1-2");
 
 
         telemetry.addData("Status", "Initialized");

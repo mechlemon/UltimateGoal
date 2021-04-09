@@ -2,22 +2,23 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.lib.Tuner;
 
 
-@TeleOp(name = "RomegaTeleop", group = "drive")
+@TeleOp(name = "RomegaTeleop", group = "drive")git
 
 public class RomegaTeleop extends OpMode {
 
     private _Hardware hardware;
     private Tuner tuner;
 
-    private String[] titles = new String[] {"linCoeff", "angCoeff", "halfDistBetWheels", "singlestick"};
-    private double[] values = new double[] {     0.7  ,      1  ,          0.2         ,       1      };
+    private String[] titles = new String[] {"linCoeff", "angCoeff"};
+    private double[] values = new double[] {     0.7  ,      1    };
 
     public void init(){
-        hardware = new _Hardware(hardwareMap, telemetry, false, false);
+        hardware = new _Hardware(hardwareMap, telemetry);
         tuner = new Tuner(titles, values, gamepad1, telemetry);
     }
 
@@ -26,22 +27,12 @@ public class RomegaTeleop extends OpMode {
 
         double linVelo = -gamepad1.left_stick_y * tuner.get("linCoeff");
 
-        double angVelo;
-        if(tuner.get("singlestick") > 0){
-            angVelo = -gamepad1.left_stick_x * tuner.get("angCoeff");
-        }else{
-            angVelo = -gamepad1.right_stick_x * tuner.get("angCoeff");
-        }
-//        double turnCenter = linVelo/angVelo; // r=v/ω
-//
-//        double radiusL = turnCenter - tuner.get("halfDistBetWheels");
-//        double radiusR = turnCenter + tuner.get("halfDistBetWheels");
-//
-//        double leftVelo = angVelo * radiusL;
-//        double rightVelo = angVelo * radiusR;
+        double angVelo = -gamepad1.right_stick_x * tuner.get("angCoeff");
 
-        double leftVelo =  linVelo + angVelo * tuner.get("halfDistBetWheels");
-        double rightVelo =  linVelo - angVelo * tuner.get("halfDistBetWheels");
+        double r = hardware.drivetrain.TRACK_WIDTH * 0.5;
+
+        double leftVelo =  linVelo + angVelo * r;
+        double rightVelo =  linVelo - angVelo * r;
 
         double maxVelo = Math.max(leftVelo, rightVelo); //to keep the ratio between L and R velo
         if(maxVelo > 1){
@@ -51,11 +42,16 @@ public class RomegaTeleop extends OpMode {
 
         hardware.drivetrain.setVelocities(leftVelo, rightVelo);
 
-        telemetry.addData("linVelo", linVelo);
-        telemetry.addData("angVelo", angVelo);
-//        telemetry.addData("turnCenter", turnCenter);
-        telemetry.addData("leftVelo target", leftVelo);
-        telemetry.addData("rightVelo target", rightVelo);
+
+        DcMotorEx leftMotor = hardware.drivetrain.leftMotor;
+        DcMotorEx rightMotor = hardware.drivetrain.rightMotor;
+        double maxTicksPerSecond = leftMotor.getMotorType().getAchieveableMaxTicksPerSecond();
+
+        telemetry.addData("odoPose", hardware.drivetrain.robotPose.toString());
+        telemetry.addData("tarVelos", leftVelo + ", " + rightVelo);
+        telemetry.addData(
+                "curVelos",
+                leftMotor.getVelocity() / maxTicksPerSecond + ", " + rightMotor.getVelocity() / maxTicksPerSecond);
         telemetry.update();
     }
 }
