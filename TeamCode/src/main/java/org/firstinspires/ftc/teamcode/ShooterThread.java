@@ -78,7 +78,7 @@ public class ShooterThread extends OpMode {
 
         spatula.setPosition(spatulaPos);
 
-        hardware.drivetrain.setPowers(forward + turn, forward - turn);
+        hardware.drivetrain.setPowers(forward - turn, forward + turn);
 
         telemetry.addData("yeetup", yeetup.getPosition());
         telemetry.addData("spatula", spatula.getPosition());

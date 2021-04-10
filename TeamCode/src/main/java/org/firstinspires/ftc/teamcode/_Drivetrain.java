@@ -3,10 +3,15 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.lib.IMU;
 import org.firstinspires.ftc.teamcode.lib.Pose2D;
+import org.firstinspires.ftc.teamcode.lib.Util;
+import org.firstinspires.ftc.teamcode.lib.Util.PID;
+import org.firstinspires.ftc.teamcode.lib.Vector2D;
 
 public class _Drivetrain {
 
@@ -25,6 +30,12 @@ public class _Drivetrain {
 
     public Pose2D robotPose = new Pose2D();
 
+    public boolean reversed = false;
+    public PID turnPID = new PID();
+    public PID drivePID = new PID();
+
+    public double maxForwardVel = 12;
+
     public _Drivetrain(DcMotorEx leftMotor, DcMotorEx rightMotor, DcMotorEx horizOdoMotor, IMU imu) {
         this.leftMotor = leftMotor;
         this.rightMotor = rightMotor;
@@ -39,6 +50,76 @@ public class _Drivetrain {
         rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         ODO_TICKS_PER_INCH = ODO_TICKS_PER_REV * ODO_GEAR_RATIO / WHEEL_CIRCUMFERENCE;
+
+        turnPID.setkP(1);
+        drivePID.setkP(0.5);
+    }
+
+    public void fieldOriented(double vx, double vy, double extraspin){
+        Vector2D linVel = new Vector2D(vx, vy, Vector2D.Type.CARTESIAN);
+        if(linVel.getMagnitude() < 0.01 && Math.abs(extraspin) < 0.01){
+            setPowers(0,0);
+            return;
+        }
+
+        double dt = 0.02;
+
+        double targetAngle = calcClosestAngle180(imu.getHeading(), linVel.getAngle());
+        double turnPower = turnPID.loop(imu.getHeading(), targetAngle, dt);
+
+        if(Math.abs(extraspin) > 0.01){
+            turnPower = extraspin;
+        }
+
+        double targetVelo = linVel.getMagnitude();
+        if(reversed) targetVelo *= -1;
+        double drivePower = 0.8 * targetVelo;
+
+        double leftVelo = drivePower - turnPower;
+        double rightVelo = drivePower + turnPower;
+
+        double maxVelo = Math.max(leftVelo, rightVelo); //to keep the ratio between L and R velo
+        if(maxVelo > 1){
+            leftVelo /= maxVelo;
+            rightVelo /= maxVelo;
+        }
+
+        setPowers(leftVelo, rightVelo);
+    }
+
+    public void drive(double drivePower, double turnPower){
+
+        double leftVelo = drivePower - turnPower;
+        double rightVelo = drivePower + turnPower;
+
+        double maxVelo = Math.max(leftVelo, rightVelo); //to keep the ratio between L and R velo
+        if(maxVelo > 1){
+            leftVelo /= maxVelo;
+            rightVelo /= maxVelo;
+        }
+
+        setPowers(leftVelo, rightVelo);
+    }
+
+    double calcClosestAngle180(double currentAngle, double targetAngle){
+        double differencePi = (currentAngle - targetAngle) % Math.PI; //angle error from (-180, 180)
+
+        double closestAngle;
+        if(Math.abs(differencePi) < (Math.PI / 2.0)){ //chooses closer of the two acceptable angles closest to currentAngle
+            closestAngle = currentAngle - differencePi;
+        }else{
+            closestAngle = currentAngle - differencePi + Math.copySign(Math.PI, differencePi);
+        }
+
+        double difference2Pi = (closestAngle - targetAngle) % (2 * Math.PI);
+        reversed = Math.abs(difference2Pi) > (Math.PI / 2.0); //if the difference is closer to 180, reverse direction
+
+        return closestAngle;
+    }
+
+    private double calcClosestAngle360(double currentAngle, double targetAngle){
+        double diffNormalized = Util.normalizeAngle(currentAngle - targetAngle, Math.PI); //angle error from (-PI, PI)
+        return currentAngle - diffNormalized;
     }
 
     public void setPowers(double leftPower, double rightPower) {
@@ -104,12 +185,24 @@ public class _Drivetrain {
         return -(leftMotor.getCurrentPosition() - leftZero) / ODO_TICKS_PER_INCH;
     }
 
+    public double getLeftVelocity(){
+        return -leftMotor.getVelocity(AngleUnit.RADIANS);
+    }
+
     public double getRightDistance(){
         return (rightMotor.getCurrentPosition() - rightZero) / ODO_TICKS_PER_INCH;
     }
 
+    public double getRightVelocity(){
+        return rightMotor.getVelocity(AngleUnit.RADIANS);
+    }
+
     public double getAvgForwardDist(){
         return 0.5*(getLeftDistance() + getRightDistance());
+    }
+
+    public double getAvgForwardVelo(){
+        return 0.5*(getLeftVelocity() + getRightVelocity());
     }
 
     public double getHorizDistance(){
