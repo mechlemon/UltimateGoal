@@ -98,7 +98,7 @@ public class AutoBlue extends LinearOpMode
         hardware = new _Hardware(hardwareMap, telemetry);
 
         String status = "start";
-        hardware.drivetrain.resetEncoders();
+        hardware.drivetrain.reset();
 
         Util.PID turnPID = new Util.PID();
         turnPID.setkP(0.7);
@@ -154,7 +154,8 @@ public class AutoBlue extends LinearOpMode
                 hardware.drivetrain.setPowers(-0.5, -0.6);
                 if (hardware.drivetrain.getAvgForwardDist() < 50) {
                     hardware.stop();
-                    status = "spin wheels";
+                    status = "done";
+//                    status = "spin wheels";
                 }
             }
 

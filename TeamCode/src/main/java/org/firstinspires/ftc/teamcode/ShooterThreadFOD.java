@@ -67,7 +67,7 @@ public class ShooterThreadFOD extends OpMode {
             spatulaPos -= 0.05;
         }
 
-        hardware.spatula.setPosition(spatulaPos);
+//        hardware.spatula.setPosition(spatulaPos);
 
 
 
@@ -80,8 +80,8 @@ public class ShooterThreadFOD extends OpMode {
             hardware.drivetrain.drive(-gamepad1.left_stick_y * tuner.get("driveCoeff"), -gamepad1.right_stick_x * tuner.get("turnCoeff"));
         }
 
-        telemetry.addData("yeetup", hardware.yeetup.getPosition());
-        telemetry.addData("spatula", hardware.spatula.getPosition());
+//        telemetry.addData("yeetup", hardware.yeetup.getPosition());
+//        telemetry.addData("spatula", hardware.spatula.getPosition());
         telemetry.addData( "rpm", hardware.currentRPM);
         telemetry.update();
     }

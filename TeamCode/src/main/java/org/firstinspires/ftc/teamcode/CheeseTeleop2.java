@@ -64,7 +64,7 @@ public class CheeseTeleop2 extends OpMode {
     }
 
 
-    public double[] cheesyDrive(double throttle, double wheel, boolean isQuickTurn, boolean isHighGear) {
+    public static double[] cheesyDrive(double throttle, double wheel, boolean isQuickTurn, boolean isHighGear) {
 
         final double kThrottleDeadband = 0.05;
         final double kWheelDeadband = 0.01;
@@ -133,7 +133,7 @@ public class CheeseTeleop2 extends OpMode {
     }
 
 
-    public double handleDeadband(double val, double deadband) {
+    public static double handleDeadband(double val, double deadband) {
         return (Math.abs(val) > Math.abs(deadband)) ? val : 0.0;
     }
 

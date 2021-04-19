@@ -27,8 +27,8 @@ public class _Hardware {
 
     public DcMotorEx shooter;
 
-    public Servo yeetup; //pushes rings into shooter to shoot
-    public Servo spatula; //scoops rings up to shooter to load
+//    public Servo yeetup; //pushes rings into shooter to shoot
+//    public Servo spatula; //scoops rings up to shooter to load
 
     // shooter constants
     public double shooterDelay = 0.3;
@@ -44,16 +44,40 @@ public class _Hardware {
         imu.initialize();
 
         drivetrain = new _Drivetrain(
-            hardwareMap.get(DcMotorEx.class, "1-0"),    //left
-            hardwareMap.get(DcMotorEx.class, "1-1"),    //right
-            hardwareMap.get(DcMotorEx.class, "1-2"),     //odo
+            hardwareMap.get(DcMotorEx.class, "2-0"),    //left
+            hardwareMap.get(DcMotorEx.class, "2-1"),    //right
+            hardwareMap.get(DcMotorEx.class, "2-2"),     //odo
             imu
         );
 
         shooter = hardwareMap.get(DcMotorEx.class, "1-3");
 
-        yeetup = hardwareMap.servo.get("yeetup");
-        spatula = hardwareMap.servo.get("spatula");
+//        yeetup = hardwareMap.servo.get("yeetup");
+//        spatula = hardwareMap.servo.get("spatula");
+
+        telemetry.addData("Status", "Initialized");
+        telemetry.update(); //needs to be run every time you send something
+    }
+
+    public _Hardware(HardwareMap hardwareMap, Telemetry telemetry, boolean justDrivetrain){
+
+        imu = new IMU(hardwareMap.get(BNO055IMU.class,"imu"));
+        imu.setHeadingAxis(IMU.HeadingAxis.YAW);
+        imu.initialize();
+
+        drivetrain = new _Drivetrain(
+                hardwareMap.get(DcMotorEx.class, "2-0"),    //left
+                hardwareMap.get(DcMotorEx.class, "2-1"),    //right
+                hardwareMap.get(DcMotorEx.class, "2-2"),     //odo
+                imu
+        );
+
+        if(!justDrivetrain){
+            shooter = hardwareMap.get(DcMotorEx.class, "1-3");
+
+//            yeetup = hardwareMap.servo.get("yeetup");
+//            spatula = hardwareMap.servo.get("spatula");
+        }
 
         telemetry.addData("Status", "Initialized");
         telemetry.update(); //needs to be run every time you send something
@@ -68,11 +92,11 @@ public class _Hardware {
     void shoot(int numShots, double runtime){
         if(runtime < numShots * shooterDelay){
 
-            if(runtime % shooterDelay < 0.5 * shooterDelay){
-                yeetup.setPosition(shooterFrontpos);
-            }else{
-                yeetup.setPosition(shooterBackpos);
-            }
+//            if(runtime % shooterDelay < 0.5 * shooterDelay){
+//                yeetup.setPosition(shooterFrontpos);
+//            }else{
+//                yeetup.setPosition(shooterBackpos);
+//            }
         }
     }
 

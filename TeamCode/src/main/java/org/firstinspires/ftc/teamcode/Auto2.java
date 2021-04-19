@@ -99,7 +99,7 @@ public class Auto2 extends LinearOpMode
         hardware = new _Hardware(hardwareMap, telemetry);
 
         String status = "start";
-        hardware.drivetrain.resetEncoders();
+        hardware.drivetrain.reset();
 
         while(opModeIsActive()){
             if(hardware.drivetrain.getAvgForwardDist() < 30){

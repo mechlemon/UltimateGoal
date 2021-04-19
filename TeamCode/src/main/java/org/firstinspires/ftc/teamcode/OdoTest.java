@@ -12,20 +12,19 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 
 
-@TeleOp(name = "RomegaTeleop", group = "drive")
+@TeleOp
 
-public class RomegaTeleop extends OpMode {
+public class OdoTest extends OpMode {
 
     private _Hardware hardware;
     private Tuner tuner;
 
     private String[] titles = new String[] {"linCoeff", "angCoeff"};
-    private double[] values = new double[] {    -0.7  ,    0.5    };
+    private double[] values = new double[] {    0.7  ,    0.3    };
 
-    OpenCvCamera phoneCam;
 
     public void init(){
-        hardware = new _Hardware(hardwareMap, telemetry);
+        hardware = new _Hardware(hardwareMap, telemetry, true);
         tuner = new Tuner(titles, values, gamepad1, telemetry);
 
 
@@ -34,14 +33,11 @@ public class RomegaTeleop extends OpMode {
     public void loop(){
         tuner.tune();
 
-        double linVelo = -gamepad1.left_stick_y * tuner.get("linCoeff");
+        double forward = -gamepad1.left_stick_y * tuner.get("linCoeff");
+        double turn = -gamepad1.right_stick_x * tuner.get("angCoeff");
 
-        double angVelo = -gamepad1.right_stick_x * tuner.get("angCoeff");
-
-        double r = hardware.drivetrain.TRACK_WIDTH * 0.5;
-
-        double leftVelo =  linVelo + angVelo * r;
-        double rightVelo =  linVelo - angVelo * r;
+        double leftVelo = forward - turn;
+        double rightVelo = forward + turn;
 
         double maxVelo = Math.max(leftVelo, rightVelo); //to keep the ratio between L and R velo
         if(maxVelo > 1){
@@ -52,20 +48,30 @@ public class RomegaTeleop extends OpMode {
         hardware.drivetrain.setPowers(leftVelo, rightVelo);
 
         if(gamepad1.x){
-            hardware.drivetrain.resetEncoders();
-            hardware.drivetrain.robotPose = new Pose2D();
+            hardware.drivetrain.reset();
         }
 
+        hardware.drivetrain.updateOdo();
+
 
         telemetry.addData(
-                "odoPose",
-                hardware.drivetrain.robotPose.toString());
+                "odoPose1",
+                hardware.drivetrain.robotPose1.toString()
+        );
+        telemetry.addData(
+                "odoPose2",
+                hardware.drivetrain.robotPose2.toString()
+        );
         telemetry.addData(
                 "LR Dists",
-                Util.roundHundreths(hardware.drivetrain.getLeftDistance()) + ", " + Util.roundHundreths(hardware.drivetrain.getRightDistance()));
+                Util.roundHundreths(hardware.drivetrain.getLeftDistance()) + ", " +
+                        Util.roundHundreths(hardware.drivetrain.getRightDistance()) + ", " +
+                        Util.roundHundreths(hardware.drivetrain.getHorizDistance())
+        );
         telemetry.addData(
                 "H Dist",
-                hardware.drivetrain.getHorizDistance());
+                hardware.drivetrain.getHorizDistance()
+        );
         telemetry.update();
     }
 }

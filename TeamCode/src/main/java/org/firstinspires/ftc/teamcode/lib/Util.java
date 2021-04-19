@@ -159,15 +159,14 @@ public class Util {
     }
 
     public static class PID {
-        double kP;
-        double kI, IworkingRange, ImaxValue;
-        double kD;
+        public double kP;
+        public double kI, IworkingRange, ImaxValue;
+        public double kD;
+        public double kFx, tolerance;
 
-        double error, lastError = 0;
+        public double error, lastError = 0;
 
-        double P, I, D, power;
-
-        Boolean initialized = false;
+        public double P, I, D, Fx, power;
 
         public double loop(double currentValue, double target, double dt) {
 
@@ -182,10 +181,14 @@ public class Util {
                 I = 0;
             }
 
+            if(Math.abs(error) > tolerance){
+                Fx = Math.copySign(kFx, error);
+            }
+
             D = kD * (error - lastError) / dt;
             lastError = error;
 
-            power = P + I + D;
+            power = P + I + D + Fx;
             return power;
         }
 
@@ -205,6 +208,10 @@ public class Util {
 
         public void setkD(double newkD) {
             kD = newkD;
+        }
+
+        public void setkFx(double newkFx, double tolerance){
+            kFx = newkFx;
         }
 
         public void copyConstants(PID other) {

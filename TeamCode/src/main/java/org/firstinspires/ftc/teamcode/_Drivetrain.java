@@ -28,7 +28,8 @@ public class _Drivetrain {
 
     public IMU imu;
 
-    public Pose2D robotPose = new Pose2D();
+    public Pose2D robotPose1 = new Pose2D();
+    public Pose2D robotPose2 = new Pose2D();
 
     public boolean reversed = false;
     public PID turnPID = new PID();
@@ -128,8 +129,6 @@ public class _Drivetrain {
 
         leftMotor.setPower(Range.clip(leftPower, -1, 1));
         rightMotor.setPower(Range.clip(rightPower, -1, 1));
-
-        updateOdo();
     }
 
     public void setVelocities(double leftVelo, double rightVelo){
@@ -138,27 +137,42 @@ public class _Drivetrain {
 
         leftMotor.setPower(Range.clip(leftVelo, -1, 1)); //as a proportion of max speed
         rightMotor.setPower(Range.clip(rightVelo, -1, 1));
-
-        updateOdo();
     }
 
     double lastLDist, lastRDist, lastHDist = 0;
     double lastHeading = 0;
     public void updateOdo(){
-        Pose2D step = calcStepAvg(
-                getLeftDistance() - lastLDist,
-                getRightDistance() - lastRDist,
-                getHorizDistance() - lastHDist,
-                imu.getHeading() - lastHeading
+
+        double currLDist = getLeftDistance();
+        double currRDist = getRightDistance();
+        double currHDist = getHorizDistance();
+        double currHeading = imu.getHeading();
+
+        Pose2D step1 = calcStepAvg(
+                currLDist - lastLDist,
+                currRDist - lastRDist,
+                currHDist - lastHDist,
+                currHeading - lastHeading
         );
 
-        lastLDist = getLeftDistance();
-        lastRDist = getRightDistance();
-        lastHDist = getHorizDistance();
+        Pose2D step2 = calcStepArcSeparate(
+                currLDist - lastLDist,
+                currRDist - lastRDist,
+                currHDist - lastHDist,
+                currHeading - lastHeading
+        );
 
-//        robotPose = robotPose.exp(step);
-        robotPose = robotPose.add(step);
-        robotPose.ang = imu.getHeading();
+
+
+        robotPose1 = robotPose1.exp(step1.rotateVec(lastHeading));
+        robotPose2 = robotPose2.exp(step2.rotateVec(lastHeading));
+        robotPose1.ang = imu.getHeading();
+        robotPose2.ang = imu.getHeading();
+
+        lastLDist = currLDist;
+        lastRDist = currRDist;
+        lastHDist = currHDist;
+        lastHeading = currHeading;
     }
 
     Pose2D calcStepArcSeparate(double dL, double dR, double dH, double dtheta){
@@ -172,13 +186,17 @@ public class _Drivetrain {
             possiblyZeroOverZero = 1/(2*r) - (dR - dL)*(dR - dL) / (6 * (2*r)*(2*r));
         }
 
-        double forward = 2*r * (dL + dR) * possiblyZeroOverZero;
+        double forward = r * (dL + dR) * possiblyZeroOverZero;
         return new Pose2D(forward, dH, dtheta);
     }
 
     Pose2D calcStepAvg(double dL, double dR, double dH, double dtheta){
         double forward = 0.5 * (dL + dR);
         return new Pose2D(forward, dH, dtheta);
+    }
+
+    public Pose2D getRobotCenter(){
+        return robotPose2.add(new Vector2D(10, 0, Vector2D.Type.CARTESIAN).rotate(robotPose2.getAngle()));
     }
 
     public double getLeftDistance(){
@@ -209,9 +227,18 @@ public class _Drivetrain {
         return (horizOdoMotor.getCurrentPosition() - horizOdoZero) / (ODO_TICKS_PER_INCH / ODO_GEAR_RATIO);
     }
 
-    public void resetEncoders(){
+    public void reset(){
         leftZero = leftMotor.getCurrentPosition();
         rightZero = rightMotor.getCurrentPosition();
         horizOdoZero = horizOdoMotor.getCurrentPosition();
+        imu.resetHeading();
+
+        lastLDist = 0;
+        lastRDist = 0;
+        lastHDist = 0;
+        lastHeading = 0;
+
+        robotPose1 = new Pose2D();
+        robotPose2 = new Pose2D();
     }
 }
