@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.widget.Button;
-
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -18,7 +16,7 @@ import org.firstinspires.ftc.teamcode.lib.Util.PID;
 import static java.lang.Math.toRadians;
 
 @TeleOp
-public class Flippy extends OpMode {
+public class TeleopFlippy extends OpMode {
 
     DcMotorEx leftDriveMotor;
     DcMotorEx rightDriveMotor;
@@ -50,8 +48,8 @@ public class Flippy extends OpMode {
 
     public void init() {
         tuner = new Tuner(
-                new String[] {"forwardCoeff", "turnCoeff", "quickTurn", "lowOffset", "lowP", "lowFx", "topP", "topFx", "shootSetLow", "shootSetTop", "antigravLow", "antigravTop", "shooterPower", "ostrichLock", "ostrichShoot"},
-                new double[] {0.9, -0.7, 3, 0.05, 0.5, 0.06, 0.5, 0.08, 1.2, -2.5, 0.16, -0.10, 1, 0.13, 0.3},
+                new String[] {"forwardCoeff", "turnCoeff", "quickTurn", "lowOffset", "lowP", "lowFx", "topP", "topFx", "intakeSetLow", "intakeSetHigh", "shootSetLow", "shootSetTop", "antigravLow", "antigravTop", "shooterPower", "ostrichLock", "ostrichShoot"},
+                new double[] {0.9, -0.7, 3, 0.15, 0.5, 0.06, 0.5, 0.08, 0, 5.8, 1.2, -2.5, 0.16, -0.10, 1, 0.13, 0.3},
                 gamepad1,
                 telemetry
         );
@@ -108,7 +106,7 @@ public class Flippy extends OpMode {
             turn = -turn;
         }
 
-        double[] powers = CheeseTeleop2.cheesyDrive(forward, turn, isQuickTurn, true);
+        double[] powers = TeleopCheese2.cheesyDrive(forward, turn, isQuickTurn, true);
         leftDriveMotor.setPower(powers[0]);
         rightDriveMotor.setPower(powers[1]);
 
@@ -159,7 +157,7 @@ public class Flippy extends OpMode {
         intakeMotor.setPower(intakePower);
 
 
-            double armLow1Angle = (armLow1Motor.getCurrentPosition() / 28.0) * 2*Math.PI / (50.9 * (36.0/16.0));
+        double armLow1Angle = (armLow1Motor.getCurrentPosition() / 28.0) * 2*Math.PI / (50.9 * (36.0/16.0));
         double armLow2Angle = (armLow1Motor.getCurrentPosition() / 28.0) * 2*Math.PI / (50.9 * (36.0/16.0));
         double antigravLow = tuner.get("antigravLow") * Math.cos(armLow1Angle);
 
@@ -177,18 +175,14 @@ public class Flippy extends OpMode {
             armLow2PID.loop(armLow2Angle, calcClosestAngle360(armLow2Angle, lowSetPos + tuner.get("lowOffset")), dt);
             armTopPID.loop(armTopAngle, topSetPos, dt);
 
-
             armLow1Motor.setPower(Range.clip(armLow1PID.getPower() + antigravLow, -armLowMaxPower, armLowMaxPower));
             armLow2Motor.setPower(Range.clip(armLow2PID.getPower() + antigravLow, -armLowMaxPower, armLowMaxPower));
             armTopMotor.setPower(Range.clip(armTopPID.getPower() + antigravTop, -armTopMaxPower, armTopMaxPower));
-
         }else{
             armLow1Motor.setPower(-gamepad2.left_stick_y*armLowMaxPower + antigravLow);
             armLow2Motor.setPower(-gamepad2.left_stick_y*armLowMaxPower + antigravLow);
             armTopMotor.setPower(-gamepad2.right_stick_y*armTopMaxPower + antigravTop);
         }
-
-
 
         telemetry.addData("shootRPM", shootRPM);
         telemetry.addData("armLow1Error", armLow1PID.error);

@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.lib.Util;
 import org.firstinspires.ftc.teamcode.lib.Util.PID;
 import org.firstinspires.ftc.teamcode.lib.Vector2D;
 
+import java.util.Vector;
+
 public class _Drivetrain {
 
     private final double WHEEL_CIRCUMFERENCE = 1.88976 * Math.PI; //48mm diameter omni to inches
@@ -56,8 +58,7 @@ public class _Drivetrain {
         drivePID.setkP(0.5);
     }
 
-    public void fieldOriented(double vx, double vy, double extraspin){
-        Vector2D linVel = new Vector2D(vx, vy, Vector2D.Type.CARTESIAN);
+    public void fieldOriented(Vector2D linVel, double extraspin){
         if(linVel.getMagnitude() < 0.01 && Math.abs(extraspin) < 0.01){
             setPowers(0,0);
             return;
@@ -88,7 +89,8 @@ public class _Drivetrain {
         setPowers(leftVelo, rightVelo);
     }
 
-    public void drive(double drivePower, double turnPower){
+
+    public void plusMinusDrive(double drivePower, double turnPower){
 
         double leftVelo = drivePower - turnPower;
         double rightVelo = drivePower + turnPower;
@@ -101,6 +103,16 @@ public class _Drivetrain {
 
         setPowers(leftVelo, rightVelo);
     }
+
+    public void nyoomToPoint(Vector2D endpointGlobal, double speed){
+        Vector2D endpointRel = robotPose1.getRelative(endpointGlobal);
+        fieldOriented(new Vector2D(speed, endpointRel.getAngle(), Vector2D.Type.POLAR), 0);
+    }
+
+    public void nyoomAboutPoint(Vector2D centerGlobal, double speed){
+        Vector2D endpointRel = robotPose1.getRelative(centerGlobal);
+    }
+
 
     double calcClosestAngle180(double currentAngle, double targetAngle){
         double differencePi = (currentAngle - targetAngle) % Math.PI; //angle error from (-180, 180)

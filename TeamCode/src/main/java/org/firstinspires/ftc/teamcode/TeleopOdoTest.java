@@ -14,7 +14,7 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 
 @TeleOp
 
-public class OdoTest extends OpMode {
+public class TeleopOdoTest extends OpMode {
 
     private _Hardware hardware;
     private Tuner tuner;
@@ -36,16 +36,7 @@ public class OdoTest extends OpMode {
         double forward = -gamepad1.left_stick_y * tuner.get("linCoeff");
         double turn = -gamepad1.right_stick_x * tuner.get("angCoeff");
 
-        double leftVelo = forward - turn;
-        double rightVelo = forward + turn;
-
-        double maxVelo = Math.max(leftVelo, rightVelo); //to keep the ratio between L and R velo
-        if(maxVelo > 1){
-            leftVelo /= maxVelo;
-            rightVelo /= maxVelo;
-        }
-
-        hardware.drivetrain.setPowers(leftVelo, rightVelo);
+        hardware.drivetrain.plusMinusDrive(forward, turn);
 
         if(gamepad1.x){
             hardware.drivetrain.reset();
@@ -68,10 +59,7 @@ public class OdoTest extends OpMode {
                         Util.roundHundreths(hardware.drivetrain.getRightDistance()) + ", " +
                         Util.roundHundreths(hardware.drivetrain.getHorizDistance())
         );
-        telemetry.addData(
-                "H Dist",
-                hardware.drivetrain.getHorizDistance()
-        );
+
         telemetry.update();
     }
 }

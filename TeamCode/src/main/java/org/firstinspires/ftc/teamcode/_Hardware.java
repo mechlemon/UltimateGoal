@@ -20,44 +20,17 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 //makes a robot, including motors, servos, imu
 public class _Hardware {
 
-
     public _Drivetrain drivetrain;
 
     public IMU imu;
 
     public DcMotorEx shooter;
 
-//    public Servo yeetup; //pushes rings into shooter to shoot
-//    public Servo spatula; //scoops rings up to shooter to load
+    public _FlippyThread flippy;
 
-    // shooter constants
-    public double shooterDelay = 0.3;
-    public double shooterBackpos = 0.79;
-    public double shooterFrontpos = 0.69;
+    public DcMotorEx intake;
 
-    public double currentRPM;
-
-    public _Hardware(HardwareMap hardwareMap, Telemetry telemetry){
-
-        imu = new IMU(hardwareMap.get(BNO055IMU.class,"imu"));
-        imu.setHeadingAxis(IMU.HeadingAxis.YAW);
-        imu.initialize();
-
-        drivetrain = new _Drivetrain(
-            hardwareMap.get(DcMotorEx.class, "2-0"),    //left
-            hardwareMap.get(DcMotorEx.class, "2-1"),    //right
-            hardwareMap.get(DcMotorEx.class, "2-2"),     //odo
-            imu
-        );
-
-        shooter = hardwareMap.get(DcMotorEx.class, "1-3");
-
-//        yeetup = hardwareMap.servo.get("yeetup");
-//        spatula = hardwareMap.servo.get("spatula");
-
-        telemetry.addData("Status", "Initialized");
-        telemetry.update(); //needs to be run every time you send something
-    }
+    public Servo ostrichServo; //pushes rings into shooter to shoot
 
     public _Hardware(HardwareMap hardwareMap, Telemetry telemetry, boolean justDrivetrain){
 
@@ -74,35 +47,45 @@ public class _Hardware {
 
         if(!justDrivetrain){
             shooter = hardwareMap.get(DcMotorEx.class, "1-3");
+            shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-//            yeetup = hardwareMap.servo.get("yeetup");
-//            spatula = hardwareMap.servo.get("spatula");
+            flippy = new _FlippyThread(
+                hardwareMap.get(DcMotorEx.class, "1-0"),     //lower left joint
+                hardwareMap.get(DcMotorEx.class, "1-1"),     //lower right joint
+                hardwareMap.get(DcMotorEx.class, "1-2")     //top joint
+            );
+
+            intake = hardwareMap.get(DcMotorEx.class, "2-3");
+
+            ostrichServo = hardwareMap.servo.get("1-0s");
         }
 
         telemetry.addData("Status", "Initialized");
         telemetry.update(); //needs to be run every time you send something
     }
 
-    void setShooterRPM(double rpm){
-        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        currentRPM = shooter.getVelocity(AngleUnit.RADIANS) * 60.0 / (2 * Math.PI);
-        shooter.setVelocity(rpm * 2 * Math.PI / 60.0, AngleUnit.RADIANS);
+    double ostrichRestPos = 0.63;
+    double ostrichShootPos = 0.70;
+    double ostrichIntakePos = 0.3;
+
+    public void ostrichRest(){
+        ostrichServo.setPosition(ostrichRestPos);
     }
 
-    void shoot(int numShots, double runtime){
-        if(runtime < numShots * shooterDelay){
-
-//            if(runtime % shooterDelay < 0.5 * shooterDelay){
-//                yeetup.setPosition(shooterFrontpos);
-//            }else{
-//                yeetup.setPosition(shooterBackpos);
-//            }
-        }
+    public void ostrichShoot(){
+        ostrichServo.setPosition(ostrichShootPos);
     }
 
-    void stop(){
+    public void ostrichIntake(){
+        ostrichServo.setPosition(ostrichIntakePos);
+    }
+
+    public void stop(){
         drivetrain.setPowers(0,0);
         shooter.setPower(0);
+        intake.setPower(0);
+        flippy.stop();
     }
 
 

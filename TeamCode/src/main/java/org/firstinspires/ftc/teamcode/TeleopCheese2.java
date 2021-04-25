@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.lib.Tuner;
 
 
 //@TeleOp(name = "CheeseTeleop2", group = "drive")
-public class CheeseTeleop2 extends OpMode {
+public class TeleopCheese2 extends OpMode {
 
 
     private _Hardware hardware;
@@ -20,7 +20,7 @@ public class CheeseTeleop2 extends OpMode {
     private boolean isHighGear = true;
 
     public void init(){
-        hardware = new _Hardware(hardwareMap, telemetry);
+        hardware = new _Hardware(hardwareMap, telemetry, true);
         tuner = new Tuner(titles, values, gamepad1, telemetry);
     }
 

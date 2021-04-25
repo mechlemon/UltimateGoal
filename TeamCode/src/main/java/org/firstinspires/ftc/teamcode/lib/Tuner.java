@@ -38,6 +38,18 @@ public class Tuner{
         this.telemetry = telemetry;
     }
 
+    public Tuner(Gamepad gamepad, Telemetry telemetry, Var... variables){
+        this.gamepad = gamepad;
+        this.telemetry = telemetry;
+
+        titles = new String[variables.length];
+        values = new double[variables.length];
+        for(int i = 0; i < variables.length; i++){
+            titles[i] = variables[i].title;
+            values[i] = variables[i].value;
+        }
+    }
+
 
     public void tune(){ //should run continuously
 
@@ -96,6 +108,15 @@ public class Tuner{
             if (array[i] == target)
                 return i;
         return -1;
+    }
+
+    public static class Var{
+        String title;
+        double value;
+        public Var(String title, double value){
+            this.title = title;
+            this.value = value;
+        }
     }
 
 

@@ -145,7 +145,7 @@ public class Util {
         }
 
         public class MotionProfilePoint {
-            double accel;
+            public double accel;
             public double velo;
             public double dist;
 
@@ -163,10 +163,12 @@ public class Util {
         public double kI, IworkingRange, ImaxValue;
         public double kD;
         public double kFx, tolerance;
+        public double kFv;
+        public double kFa;
 
         public double error, lastError = 0;
 
-        public double P, I, D, Fx, power;
+        public double P, I, D, Fx, Fv, Fa, power;
 
         public double loop(double currentValue, double target, double dt) {
 
@@ -192,6 +194,34 @@ public class Util {
             return power;
         }
 
+        public double loop(double curX, double tarX, double tarV, double tarA, double dt) {
+
+            error = tarX - curX;
+
+            P = kP * error;
+
+            if (kI != 0 && Math.abs(error) < IworkingRange && Math.signum(error) == Math.signum(lastError)) {
+                I += kI * error * dt;
+                I = limit(I, ImaxValue);
+            } else {
+                I = 0;
+            }
+
+            D = kD * (error - lastError) / dt;
+            lastError = error;
+
+
+            if(Math.abs(error) > tolerance){
+                Fx = Math.copySign(kFx, error);
+            }
+
+            Fv = kFv * tarV;
+            Fa = kFa * tarA;
+
+            power = P + I + D + Fx + Fv + Fa;
+            return power;
+        }
+
         public double getPower() {
             return power;
         }
@@ -213,6 +243,12 @@ public class Util {
         public void setkFx(double newkFx, double tolerance){
             kFx = newkFx;
         }
+
+        public void setkFva(double newkFv, double newkFa){
+            kFv = newkFv;
+            kFa = newkFa;
+        }
+
 
         public void copyConstants(PID other) {
             this.kP = other.kP;

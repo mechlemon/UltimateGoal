@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.lib.Tuner;
 
 @TeleOp(name = "CheeseTeleop", group = "drive")
-public class CheeseTeleop extends OpMode {
+public class TeleopCheese extends OpMode {
 
 
     private _Hardware hardware;
@@ -17,7 +17,7 @@ public class CheeseTeleop extends OpMode {
     private double[] values = new double[] {    0.5    ,     0.58   ,        0.2    ,        10        ,       1      ,       1      };
 
     public void init(){
-        hardware = new _Hardware(hardwareMap, telemetry);
+        hardware = new _Hardware(hardwareMap, telemetry, true);
         tuner = new Tuner(titles, values, gamepad1, telemetry);
     }
 

@@ -52,6 +52,8 @@ public class AutoBlue extends LinearOpMode
 
     _Hardware hardware;
 
+    double ostrichShoot = 0.7;
+
     @Override
     public void runOpMode() {
 
@@ -95,7 +97,7 @@ public class AutoBlue extends LinearOpMode
         phoneCam.stopStreaming();
         phoneCam.closeCameraDevice();
 
-        hardware = new _Hardware(hardwareMap, telemetry);
+        hardware = new _Hardware(hardwareMap, telemetry, false);
 
         String status = "start";
         hardware.drivetrain.reset();
@@ -103,6 +105,7 @@ public class AutoBlue extends LinearOpMode
         Util.PID turnPID = new Util.PID();
         turnPID.setkP(0.7);
         turnPID.setkI(0.1, 0.4, 0.5);
+        turnPID.setkFx(0.2, 0.05);
 
         while(opModeIsActive()){
 
@@ -160,7 +163,7 @@ public class AutoBlue extends LinearOpMode
             }
 
             if(status == "spin wheels"){
-                hardware.setShooterRPM(42);
+                hardware.shooter.setPower(0.95);
                 resetStartTime();
                 status = "wait for speed";
                 resetStartTime();
@@ -176,7 +179,7 @@ public class AutoBlue extends LinearOpMode
             }
 
             if(status == "shoot1"){
-                hardware.shoot(1, getRuntime());
+                hardware.ostrichServo.setPosition(ostrichShoot);
                 if(getRuntime() > 1){
                     status = "align2";
                 }
@@ -192,7 +195,7 @@ public class AutoBlue extends LinearOpMode
             }
 
             if(status == "shoot2"){
-                hardware.shoot(1, getRuntime());
+                hardware.ostrichServo.setPosition(ostrichShoot);
                 if(getRuntime() > 1){
                     status = "align3";
                 }
@@ -208,7 +211,7 @@ public class AutoBlue extends LinearOpMode
             }
 
             if(status == "shoot3"){
-                hardware.shoot(1, getRuntime());
+                hardware.ostrichServo.setPosition(ostrichShoot);
                 if(getRuntime() > 1){
                     status = "park";
                 }
